@@ -52,11 +52,8 @@ class _DoughnutChartState extends State<DoughnutChart> {
       color: Colors.yellow.shade50,
       height: widget.height,
       width: widget.width,
-      child: Listener(
-        onPointerHover: controller._chartInteractionListener,
-        child: CustomPaint(
-          painter: DoughnutChartPainter(controller: controller),
-        ),
+      child: CustomPaint(
+        painter: DoughnutChartPainter(controller: controller),
       ),
     );
   }
@@ -71,6 +68,74 @@ class DoughnutChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    Offset center = Offset(size.width / 2, size.height / 2);
+    double total = 0;
+
+    // draw the background layer
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = controller._strokeWidth
+      ..color = Colors.red.withOpacity(0.3);
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: controller._radius),
+      0,
+      360,
+      false,
+      paint,
+    );
+
+    double sweepAngle = (50 / 100) * (2 * pi);
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: controller._radius),
+      0,
+      sweepAngle,
+      false,
+      paint,
+    );
+
+    /// drawing handler
+    Offset initialPoint = getCoordinatesBasedOnAngle(0);
+    Offset endPoint = getCoordinatesBasedOnAngle(sweepAngle);
+
+    final handlerBrush = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3
+      ..color = Colors.blue;
+
+    _drawHandler(canvas, initialPoint, handlerBrush);
+
+    _drawHandler(canvas, endPoint, handlerBrush);
+  }
+
+  void _drawHandler(Canvas canvas, Offset center, Paint handlerBrush) {
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 3
+      ..color = Colors.white;
+
+    canvas.drawCircle(
+      center,
+      10,
+      paint,
+    );
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: 10),
+      0,
+      360,
+      false,
+      handlerBrush,
+    );
+  }
+
+  Offset getCoordinatesBasedOnAngle(double angle) {
+    double x = controller._center.dx + controller._radius * cos(angle);
+    double y = controller._center.dy + controller._radius * sin(angle);
+    return Offset(x, y);
+  }
+
+  void paint1(Canvas canvas, Size size) {
     Offset center = Offset(size.width / 2, size.height / 2);
     double total = 0;
     for (int idx = 0; idx < controller._data.length; idx++) {
